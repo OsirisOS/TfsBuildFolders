@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<componentModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/ModelStore" dslVersion="1.0.0.0" Id="9de5b1ba-2385-414a-be39-6c7732561bb2" name="Inmeta Build Explorer" linkedPackageId="dfc5635e-6eec-4cd8-ba0a-d6cffd3d771d" xmlns="http://schemas.microsoft.com/VisualStudio/TeamArchitect/ComponentDesigner">
+  <ownedCommentsInternal>
+    <comment Id="9222ef22-cd22-4054-a7e7-76d99b526ab6">
+      <elementDefinition Id="9b9f245f-d568-4d58-895d-717dc5c4b8b5" />
+      <body>The provided interfaces are named with the acctual implementation name not the Interface provided. This is intenational and done for compoenent clarity.
+</body>
+      <annotatedElements>
+        <providedInterfaceMoniker Id="1200cae9-3a0f-4409-8d73-bb7b9f728181" LastKnownName="Port1" />
+        <providedInterfaceMoniker Id="8019527d-1915-408f-9f72-e5ae25ec8f18" LastKnownName="Port2" />
+      </annotatedElements>
+    </comment>
+    <comment Id="057f8060-e483-4942-a583-d18e2f1f4372">
+      <elementDefinition Id="91a69353-00be-4e0f-bbc6-43f274b29ad1" />
+      <body>I need this provided interface, but since 
+it is not public, reflection is used. </body>
+      <annotatedElements>
+        <providedInterfaceMoniker Id="1c0d1dfd-4e4f-4964-8c61-195bae87fe36" LastKnownName="Port1" />
+        <componentMoniker Id="a338e383-8733-44f6-9934-a84b73264770" LastKnownName="Inmeta Team Explorer Addin" />
+      </annotatedElements>
+    </comment>
+  </ownedCommentsInternal>
+  <packagedElements>
+    <componentModelHasComponents>
+      <component Id="aa72f3e1-cbeb-4058-8e1b-00cef1c04acb" name="TeamExplorer Extension" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="28483722-d0e6-45cb-95b6-f0a8e707ba28" />
+        <ownedAttributesInternal>
+          <requiredInterface Id="dadfcb77-66bb-4fd3-9ac4-a4c7d70aaead" name="Port1" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isService="false" isBehavior="false">
+            <elementDefinition Id="fa77c763-6ea4-43ec-a8db-be7ff5a992e3" />
+            <suppliersInternal>
+              <dependency Id="d4cb0f6a-b052-4a0b-a8b0-de0bce47deb8">
+                <providedInterfaceMoniker Id="1200cae9-3a0f-4409-8d73-bb7b9f728181" LastKnownName="Port1" />
+                <elementDefinition Id="33586011-8047-4444-86d9-0e9c204a5380" />
+              </dependency>
+            </suppliersInternal>
+            <type_NamedElement>
+              <interfaceMoniker Id="da3f9cbc-f031-4218-b5b2-5e327d305b76" LastKnownName="PluginHostPackage" />
+            </type_NamedElement>
+          </requiredInterface>
+          <part Id="54f492f5-87fa-4fa1-ba5e-1485ac3dd597" name="TeamBuild " isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="Composite" isComposite="true">
+            <elementDefinition Id="1533ed74-dc45-48bc-ae14-d88ca22a885a" />
+            <type_NamedElement>
+              <componentMoniker Id="adbfdaa9-7e9c-494d-9284-72a0a17d78ad" LastKnownName="BuildNodes" />
+            </type_NamedElement>
+          </part>
+          <requiredInterface Id="442c328d-a16a-4d6f-a025-e69a957a24ff" name="Port2" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isService="false" isBehavior="false">
+            <elementDefinition Id="d5f10941-5b87-49c9-b0c8-de729812ce6d" />
+            <suppliersInternal>
+              <dependency Id="ee87c259-b5df-4dac-b7e3-2c724a1d6a59">
+                <providedInterfaceMoniker Id="8019527d-1915-408f-9f72-e5ae25ec8f18" LastKnownName="Port2" />
+                <elementDefinition Id="cf9845e0-b7ba-4109-a80d-affc39c31e3b" />
+              </dependency>
+            </suppliersInternal>
+            <type_NamedElement>
+              <interfaceMoniker Id="3a52c25e-b749-4682-b023-1c90958e005e" LastKnownName="BasicAsyncPlugin" />
+            </type_NamedElement>
+          </requiredInterface>
+        </ownedAttributesInternal>
+      </component>
+    </componentModelHasComponents>
+    <componentModelHasComponents>
+      <component Id="a338e383-8733-44f6-9934-a84b73264770" name="Inmeta Team Explorer Addin" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="275d3ba0-b94c-4f46-93ed-58ba5779da72" />
+        <ownedAttributesInternal>
+          <providedInterface Id="1200cae9-3a0f-4409-8d73-bb7b9f728181" name="Port1" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isService="false" isBehavior="false">
+            <elementDefinition Id="a643b03f-12db-49e6-bbe6-c5277f14f95d" />
+            <type_NamedElement>
+              <interfaceMoniker Id="1ded7596-328c-40ee-9b40-0f18ac942b12" LastKnownName="InmetaVisualStudioTeamExplorerPackage" />
+            </type_NamedElement>
+          </providedInterface>
+          <providedInterface Id="8019527d-1915-408f-9f72-e5ae25ec8f18" name="Port2" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isService="false" isBehavior="false">
+            <elementDefinition Id="05eac4b0-ac0f-46da-b15a-ffdc8fa57963" />
+            <type_NamedElement>
+              <interfaceMoniker Id="f68d3d6e-7063-4fe9-aab7-8939f367be13" LastKnownName="BuildExplorerAddin" />
+            </type_NamedElement>
+          </providedInterface>
+        </ownedAttributesInternal>
+      </component>
+    </componentModelHasComponents>
+    <modelContainsNamedElements>
+      <Interface Id="da3f9cbc-f031-4218-b5b2-5e327d305b76" name="PluginHostPackage" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="ee1c5b90-7bf1-41c7-8295-789a2596eb18" />
+      </Interface>
+    </modelContainsNamedElements>
+    <modelContainsNamedElements>
+      <Interface Id="1ded7596-328c-40ee-9b40-0f18ac942b12" name="InmetaVisualStudioTeamExplorerPackage" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="e9e04cf6-8fc4-487c-aa2a-66ce9ef7a034" />
+      </Interface>
+    </modelContainsNamedElements>
+    <componentModelHasComponents>
+      <component Id="adbfdaa9-7e9c-494d-9284-72a0a17d78ad" name="BuildNodes" visibility="Protected" isAbstract="false" isLeaf="false" isActiveClass="false">
+        <elementDefinition Id="ac401774-bf85-4dd6-84a2-ad1113afda47" />
+        <ownedAttributesInternal>
+          <providedInterface Id="1c0d1dfd-4e4f-4964-8c61-195bae87fe36" name="Port1" isLeaf="false" isStatic="false" isReadOnly="false" isDerived="false" isDerivedUnion="false" aggregation="None" isComposite="false" isService="false" isBehavior="false">
+            <elementDefinition Id="0814123a-dabe-464f-bd73-f744ef1483e3" />
+            <type_NamedElement>
+              <interfaceMoniker Id="2f4cc0c9-5794-49e5-b88c-8355727c6302" LastKnownName=" TeamExplorerPluginFolder" />
+            </type_NamedElement>
+          </providedInterface>
+        </ownedAttributesInternal>
+      </component>
+    </componentModelHasComponents>
+    <modelContainsNamedElements>
+      <Interface Id="3a52c25e-b749-4682-b023-1c90958e005e" name="BasicAsyncPlugin" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="0b1e2cd5-d1dd-4991-b967-35c52ce21911" />
+      </Interface>
+    </modelContainsNamedElements>
+    <modelContainsNamedElements>
+      <Interface Id="f68d3d6e-7063-4fe9-aab7-8939f367be13" name="BuildExplorerAddin" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="7a48d357-a732-4e61-b77c-0bfeddf92653" />
+      </Interface>
+    </modelContainsNamedElements>
+    <modelContainsNamedElements>
+      <Interface Id="2f4cc0c9-5794-49e5-b88c-8355727c6302" name=" TeamExplorerPluginFolder" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="753f3d72-9361-4e4d-80de-df00ecb45591" />
+      </Interface>
+    </modelContainsNamedElements>
+  </packagedElements>
+  <package Id="dfc5635e-6eec-4cd8-ba0a-d6cffd3d771d" name="InmetaTeamExplorerAddinModels">
+    <elementDefinition Id="cc566770-61fe-4f73-9747-b2cc5a00fff6" />
+    <profileInstances>
+      <packageHasProfileInstances Id="09b0b47a-dcbc-4a42-a506-844761e6ebbb">
+        <profileInstance Id="01cad033-e594-4371-a9e1-7fbe0294a9b1" name="StandardProfileL2">
+          <elementDefinition Id="e34d544e-0fea-4ed6-ac5e-1b74119ac791" />
+        </profileInstance>
+        <elementDefinition Id="0caec977-1f8c-4ba3-a7db-8cc9ad9cc73b" />
+      </packageHasProfileInstances>
+      <packageHasProfileInstances Id="1443146f-3be4-478e-aff2-687d7e27a09a">
+        <profileInstance Id="10059be4-bde6-4997-9553-993e1db61c30" name="StandardProfileL3">
+          <elementDefinition Id="532ea607-fb19-44b8-8502-3351b05452be" />
+        </profileInstance>
+        <elementDefinition Id="29349502-908c-4fda-9054-c48619c59ed0" />
+      </packageHasProfileInstances>
+    </profileInstances>
+  </package>
+</componentModel>
