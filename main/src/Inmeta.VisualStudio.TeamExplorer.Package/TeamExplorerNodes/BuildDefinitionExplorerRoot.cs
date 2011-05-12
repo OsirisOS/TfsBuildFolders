@@ -16,7 +16,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
             Name = path;
             InitAsFolder();
         }
-
+        
         public override ImageList Icons
         {
             get
@@ -31,6 +31,11 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
         }
 
         public void OpenEditBuildDefintion()
+        {
+            //do nothing
+        }
+
+        public void GotoTeamExplorerBuildNode()
         {
             //do nothing
         }
@@ -76,6 +81,25 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
             }
         }
 
+        public bool IsDisabled
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+
+        public void ViewAllBuilds()
+        {
+            var node = FindAssociated.AssociatedNode("All Build Definitions", this);
+            node.ParentHierarchy.CallMethod("ViewBuilds", node);
+        }
+
+        public void QueueDefaultSubFolderBuilds()
+        {
+            // ignore here, should never be called
+        }
     }
 
 }

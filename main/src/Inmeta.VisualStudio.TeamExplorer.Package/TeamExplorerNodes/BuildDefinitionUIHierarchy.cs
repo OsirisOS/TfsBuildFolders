@@ -13,7 +13,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 {
     internal class BuildDefinitionUIHierarchy : BaseUIHierarchy, IVsSelectionEvents
     {
-        private  uint _monitorSelectionCockie;
+        private uint _monitorSelectionCockie;
         private static BuildDefinitionUIHierarchy _instance;
 
         public static BuildDefinitionUIHierarchy Hierarchy
@@ -38,6 +38,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
         {
             if (guidCmdGroup == GuidList.guidInmeta_VisualStudio_TeamExplorer_PackageCmdSet)
             {
+                var node = this.NodeFromItemId(itemId) as ICommandableNode;
                 switch (nCmdId)
                 {
                     case GuidList.BtnRefresh:
@@ -46,33 +47,43 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
                     case GuidList.BtnQeueNewBuild:
                         {
-                            var node = this.NodeFromItemId(itemId);
-                            if (node is ICommandableNode)
-                                (node as ICommandableNode).QueueNewBuild();
+                            if (node != null)
+                                node.QueueNewBuild();
                         }
                         break;
                     case GuidList.BtnEditDefinition:
                         {
-                            var node = this.NodeFromItemId(itemId);
-                            if (node is ICommandableNode)
-                                (node as ICommandableNode).OpenEditBuildDefintion();
+                            if (node != null)
+                                node.OpenEditBuildDefintion();
                         }
                         break;
                     case GuidList.BtnViewBuilds:
                         {
-                            var node = this.NodeFromItemId(itemId);
-                            if (node is ICommandableNode)
-                                (node as ICommandableNode).ViewBuilds();
-
+                            if (node != null)
+                                node.ViewBuilds();
                         }
                         break;
                     case GuidList.BtnOptions:
                         {
                             Options();
-                            /*var node = this.NodeFromItemId(itemId);
-                            if (node is ICommandableNode)
-                                (node as ICommandableNode).Options(); */
-                            
+                        }
+                        break;
+                    case GuidList.BtnQueueDefaultSubBuilds:
+                        {
+                            if (node != null)
+                                node.QueueDefaultSubFolderBuilds();
+                        }
+                        break;
+                    case GuidList.BtnViewAllBuilds:
+                        {
+                            if (node != null)
+                                node.ViewAllBuilds();
+                        }
+                        break;
+                    case GuidList.BtnGotoTEBuildNode:
+                        {
+                            if (node != null)
+                                node.GotoTeamExplorerBuildNode();
                         }
                         break;
                 }
@@ -98,20 +109,33 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
             {
                 //this gory code makes the correct context commands visible depending on its position in the hierarchy (root, branch or leaf). 
                 if (cCmds > 0
-                    && (cmds[0].cmdID == GuidList.BtnEditDefinition || cmds[0].cmdID == GuidList.BtnViewBuilds || cmds[0].cmdID == GuidList.BtnQeueNewBuild ))
+                    && (cmds[0].cmdID == GuidList.BtnEditDefinition || 
+                    cmds[0].cmdID == GuidList.BtnViewBuilds || 
+                    cmds[0].cmdID == GuidList.BtnQeueNewBuild ||
+                    cmds[0].cmdID == GuidList.BtnViewAllBuilds ||
+                    cmds[0].cmdID == GuidList.BtnGotoTEBuildNode ||
+                    cmds[0].cmdID == GuidList.BtnQueueDefaultSubBuilds
+                    ))
                 {
                     var result = (int)OLECMDF.OLECMDF_SUPPORTED | (int)OLECMDF.OLECMDF_ENABLED;
                     result |= (int)OLECMDF.OLECMDF_INVISIBLE;
 
                     var node = NodeFromItemId(itemId);
-                    if (node != null && node is BuildDefinitionExplorerNode)
+                    if (node != null)
                     {
-                        //if not children invisible = true
-                        if (node.FirstChild == null)
-                            result &= ~(int)OLECMDF.OLECMDF_INVISIBLE;
+                        if (node is BuildDefinitionExplorerNode)
+                        {
+                            //if not children invisible = true
+                            if (node.FirstChild == null || cmds[0].cmdID == GuidList.BtnQueueDefaultSubBuilds)
+                                result &= ~(int) OLECMDF.OLECMDF_INVISIBLE;
+                        }
+                        else if (node is BuildDefinitionExplorerRoot) {
+                            if ((cmds[0].cmdID == GuidList.BtnViewAllBuilds))
+                                result &= ~(int)OLECMDF.OLECMDF_INVISIBLE;
                     }
+                }
 
-                    cmds[0].cmdf =(uint)result;
+                    cmds[0].cmdf = (uint)result;
                 }
 
                 return VSConstants.S_OK;
@@ -132,7 +156,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
             PopulateTree(HierarchyNode);
         }
-  
+
         public int OnSelectionChanged(IVsHierarchy pHierOld, uint itemidOld, IVsMultiItemSelect pMISOld, ISelectionContainer pSCOld, IVsHierarchy pHierNew, uint itemidNew, IVsMultiItemSelect pMISNew, ISelectionContainer pSCNew)
         {
             if (pHierNew == this)
@@ -143,7 +167,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
                 }
                 return VSConstants.S_OK;
             }
-          
+
             return VSConstants.S_OK;
         }
 
@@ -161,7 +185,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
         {
             var options = new ToolsOptions.Options(this);
             var sep = options.SeparatorToken;
-            var root = BuildDefinitionTreeNodeFactory.CreateOrMergeIntoTree("root", sep);
+            var root = BuildDefinitionTreeNodeFactory.CreateOrMergeIntoTree("root", sep, null, false);
 
             try
             {
@@ -171,19 +195,34 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
                     .GetFieldValue("m_hierarchyManager")
                         .GetFieldValue("m_hierarchyNodes") as Dictionary<uint, BaseHierarchyNode>;
 
-
                 foreach (var builds in from baseHierarchyNode in nodes
                                        where baseHierarchyNode.Value.CanonicalName.EndsWith("/Builds")
                                        select baseHierarchyNode.Value
                                            into node
                                            select node.NestedHierarchy as BaseUIHierarchy
                                                into buildHier
-                                               select buildHier.GetFieldValue("m_hierarchyManager").GetFieldValue("m_hierarchyNodes") as Dictionary<uint, BaseHierarchyNode>)
+                                               select buildHier.GetFieldValue("m_hierarchyManager").GetFieldValue("m_hierarchyNodes") as Dictionary<uint, BaseHierarchyNode>
+                                               
+                                               )
                 {
                     foreach (var buildNodeKV in
-                        builds.Where(buildNodeKV => buildNodeKV.Value != null && !String.IsNullOrEmpty(buildNodeKV.Value.Name) && buildNodeKV.Value.Name != "All Build Definitions"))
+                        builds.Reverse().Where(buildNodeKV => buildNodeKV.Value != null && !String.IsNullOrEmpty(buildNodeKV.Value.Name)))
                     {
-                        BuildDefinitionTreeNodeFactory.CreateOrMergeIntoTree("root" + sep + buildNodeKV.Value.Name, sep, root);
+                        if (buildNodeKV.Value.Name == "All Build Definition")
+                        {
+                            BuildDefinitionTreeNodeFactory.CreateOrMergeIntoTree("root" + sep + buildNodeKV.Value.Name,
+                                                                                 sep, root, false);
+                            var buildNode = new BuildDefinitionExplorerNode(root, sep);
+                            teNode.AddChild(buildNode);
+
+                        }
+                        else
+                        {
+                            bool disabled = buildNodeKV.Value.OverlayIconIndex == 6;
+                            // Number found through investigation, we only look in the Build folder, we dont access the Build definitions, in order to keep performance up
+                            BuildDefinitionTreeNodeFactory.CreateOrMergeIntoTree("root" + sep + buildNodeKV.Value.Name,
+                                                                                 sep, root, disabled);
+                        }
                     }
                     break;
                 }
@@ -224,7 +263,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
             }
         }
-    
+
 
     }
 }

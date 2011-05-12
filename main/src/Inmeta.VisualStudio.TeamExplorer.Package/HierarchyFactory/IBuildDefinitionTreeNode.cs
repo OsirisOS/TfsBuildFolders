@@ -9,5 +9,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
         IBuildDefinitionTreeNode Parent { get; }
         string Path { get; }
         bool IsRoot { get; }
+        bool IsDisabled { get; }
+        bool IsLeafNode { get; }
     }
 }

@@ -9,7 +9,11 @@
         void OpenEditBuildDefintion();
         void QueueNewBuild();
         void ViewBuilds();
+        void ViewAllBuilds();
+        void QueueDefaultSubFolderBuilds();
+        void GotoTeamExplorerBuildNode();
 
         void Options();
+        bool IsDisabled { get; }
     }
 }

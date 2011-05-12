@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
 {
     [UserContext(VSUSERCONTEXTATTRIBUTEUSAGE.VSUC_Usage_LookupF1, "keyword", "vs.tfc.teamprojectexplorer_teambuildsnode")]
-    internal class BuildDefinitionTreeNode : IBuildDefinitionTreeNode
+    abstract internal class BuildDefinitionTreeNode : IBuildDefinitionTreeNode
     {
         private readonly char separator;
         protected List<IBuildDefinitionTreeNode> _children = new List<IBuildDefinitionTreeNode>();
@@ -34,15 +34,20 @@ namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
                 var temp = path.Aggregate("", (seed, node) => seed += separator + node.Name);
 
                 //remove first [InmetaBuildExplorerSettings.Default.SeparatorToken]
-                return temp.Remove(0, 1);
+                return  temp.Length > 0 ? temp.Remove(0, 1) : string.Empty;
 
             }
         }
-       
-        public BuildDefinitionTreeNode(string name, char separator)
+
+        protected BuildDefinitionTreeNode(string name, char separator)
         {
             this.separator = separator;
             Name = name;
+        }
+
+        public virtual bool IsLeafNode
+        {
+            get { return false; }
         }
 
         internal void AddChild(IBuildDefinitionTreeNode child)
@@ -56,6 +61,11 @@ namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
         public override string ToString()
         {
             return Name;
+        }
+
+        public virtual bool IsDisabled
+        {
+            get { return false; }
         }
     }
 }

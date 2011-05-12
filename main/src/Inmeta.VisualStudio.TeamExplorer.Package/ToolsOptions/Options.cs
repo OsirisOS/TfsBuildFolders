@@ -14,6 +14,8 @@ namespace Inmeta.VisualStudio.TeamExplorer.ToolsOptions
         private const string SettingsFileName = "Inmeta.VisualStudio.BuildExplorer.Settings.xml";
         private const string TemporaryWorkspaceName = "InmetaVisualStudioBuildExplorerTempWorkspace";
         private const string CheckinComment = "Updated Inmeta Visual Studio Build Explorer Settings";
+        private static string TfsUrl { get; set; }
+        private static TfsTeamProjectCollection Tfs { get; set; }
 
         public Options(BaseUIHierarchy hierarchy)
         {
@@ -35,7 +37,6 @@ namespace Inmeta.VisualStudio.TeamExplorer.ToolsOptions
             {
                 if (String.IsNullOrEmpty(value))
                     throw new ArgumentNullException("Seperator token cannot be empty/null");
-
                 VersionControlServer vcs = GetVersionControlServer();
                 string settingsServerPath = GetSettingsFilePath(Hierarchy.ProjectName, SettingsFileName);
                 string localPath;
@@ -53,18 +54,20 @@ namespace Inmeta.VisualStudio.TeamExplorer.ToolsOptions
                     ws.PendEdit(localPath, RecursionType.OneLevel);
                     SaveSettings(localPath, value);
                 }
-                SaveSettings(localPath, value);
                 var pendingschanges = ws.GetPendingChanges(settingsServerPath);
-                if (pendingschanges.Length <= 0) 
-                    return;
-                ws.CheckIn(pendingschanges, CheckinComment, null, null, new PolicyOverrideInfo(CheckinComment, null));
-                if (ws.Name == TemporaryWorkspaceName)
+                if (pendingschanges.Length > 0)
                 {
-                    ws.Delete();
+                    ws.CheckIn(pendingschanges, CheckinComment, null, null, new PolicyOverrideInfo(CheckinComment, null));
+                    if (ws.Name == TemporaryWorkspaceName)
+                    {
+                        ws.Delete();
+                    }
                 }
-
                 //reset settings.
                 settings = null;
+
+                
+                
             }
         }
 
@@ -87,18 +90,14 @@ namespace Inmeta.VisualStudio.TeamExplorer.ToolsOptions
 
         private VersionControlServer GetVersionControlServer()
         {
-            var credentials = CredentialCache.DefaultNetworkCredentials;
-            var tfs = new TfsTeamProjectCollection(new Uri(Hierarchy.ServerUrl), credentials);
-            tfs.Authenticate();
-            var vcs = (VersionControlServer) tfs.GetService(typeof (VersionControlServer));
-            return vcs;
+            var authenticatedTFS = new AuthTfsTeamProjectCollection(Hierarchy.ServerUrl);
+            return authenticatedTFS.TfsVersionControlServer;
         }
 
         private void SaveSettings(string localPath, string separator)
         {
-            settings = new BuildExplorerSettings();
-            settings.Separator = separator;
-            Serializer.Serialize<BuildExplorerSettings>(localPath, (BuildExplorerSettings) settings);
+            settings = new BuildExplorerSettings {Separator = separator};
+            Serializer.Serialize(localPath, settings);
         }
 
         private BuildExplorerSettings GetSettings()

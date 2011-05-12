@@ -45,9 +45,61 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
                 catch
                 {
                 }
-                BuildDefinitionUIHierarchy.Hierarchy.RefreshTree();
-                throw new ArgumentException("Build definition with path name '" + nodeName + "' does not exist!" +
-                                            Environment.NewLine + "Inmeta Build Explorer has been refreshed.");
+               // BuildDefinitionUIHierarchy.Hierarchy.RefreshTree();
+                throw new ArgumentException("Build definition with path name '" + nodeName + "' does not exist!");
+            }
+        }
+
+
+        /// <summary>
+        /// Finds multiple matching build nodes, based on a partly name, like the name of the folder.
+        /// </summary>
+        /// <param name="canonicalnodeName"></param>
+        /// <param name="hierarchyNode"></param>
+        /// <returns></returns>
+        internal static List<BaseHierarchyNode> AssociatedNodes(string canonicalnodeName, BaseHierarchyNode hierarchyNode)
+        {
+            string nodeName = canonicalnodeName.Split('/')[0];
+            lock (_syncLock)
+            {
+                //try
+                //{
+                   
+                    var nodes =
+                        hierarchyNode.ParentHierarchy.ParentHierarchy.GetFieldValue("m_hierarchyManager").GetFieldValue(
+                            "m_hierarchyNodes") as Dictionary<uint, BaseHierarchyNode>;
+
+                    //List<BaseHierarchyNode> nodeList = (from baseHierarchyNode in nodes
+                    //                                    where baseHierarchyNode.Value.CanonicalName.EndsWith("/Builds")
+                    //                                    select baseHierarchyNode.Value
+                    //                                    into node select node.NestedHierarchy as BaseUIHierarchy
+                    //                                    into buildHier select buildHier.GetFieldValue("m_hierarchyManager").GetFieldValue("m_hierarchyNodes") as Dictionary<uint, BaseHierarchyNode>
+                    //                                    into builds from build in builds.Where(build => build.Value.Name.Contains(nodeName)) select build).Select(build => build.Value).ToList();
+                    var nodeList = new List<BaseHierarchyNode>();
+                    foreach (var node in nodes)
+                    {
+                        if (node.Value.CanonicalName.EndsWith("/Builds"))
+                        {
+                            var nodeNH = node.Value.NestedHierarchy as BaseUIHierarchy;
+                            var buildHier =
+                                nodeNH.GetFieldValue("m_hierarchyManager").GetFieldValue("m_hierarchyNodes") as
+                                Dictionary<uint, BaseHierarchyNode>;
+                            foreach (var build in buildHier)
+                            {
+                                if (build.Value!=null && build.Value.Name!=null && build.Value.Name.Contains(nodeName))
+                                    nodeList.Add(build.Value);
+                            }
+                        }
+
+
+                    }
+                    return nodeList;
+                //}
+                //catch
+                //{
+                //}
+                //// BuildDefinitionUIHierarchy.Hierarchy.RefreshTree();
+                //throw new ArgumentException("Build definition with path name '" + nodeName + "' does not exist!");
             }
         }
 

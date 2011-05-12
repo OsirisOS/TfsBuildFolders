@@ -19,7 +19,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
     {
         public string[] GenerateFoldersFromName(string name, char sep)
         {
-            return name.Split(new char[] { sep }, StringSplitOptions.None);
+            return name.Split(new[] { sep }, StringSplitOptions.None);
         }
     }
 }
