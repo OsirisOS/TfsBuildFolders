@@ -2,6 +2,7 @@
 using System.ComponentModel.Design;
 using System.Windows.Forms;
 using Inmeta.VisualStudio.TeamExplorer.Plugin;
+using Inmeta.VisualStudio.TeamExplorer.TeamExplorerNodes;
 using Microsoft.TeamFoundation.Common;
 using Fasterflect;
 
@@ -10,9 +11,12 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
     public class BuildDefinitionExplorerRoot : RootNode, ICommandableNode
     {
-        public BuildDefinitionExplorerRoot(string path)
+        private const char defaultSep = '.';
+        private ITFS TFS;
+        public BuildDefinitionExplorerRoot(string path, ITFS  tfs)
             : base(path)
         {
+            TFS = tfs;
             Name = path;
             InitAsFolder();
         }
@@ -27,7 +31,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         public override void DoDefaultAction()
         {
-            FindAssociated.AssociatedNode("All Build Definitions", this).DoDefaultAction();
+            FindAssociated.AssociatedNode("All Build Definitions", this, defaultSep).DoDefaultAction();  // uses default separator, doesnt matter
         }
 
         public void OpenEditBuildDefintion()
@@ -42,7 +46,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         public void QueueNewBuild()
         {
-            var node = FindAssociated.AssociatedNode("All Build Definitions", this);
+            var node = FindAssociated.AssociatedNode("All Build Definitions", this, defaultSep);
             node.ParentHierarchy.CallMethod("QueueBuild", node);
         }
 
@@ -61,7 +65,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         public void Options()
         {
-            using (var options = new ToolsOptions.OptionsForm(ParentHierarchy))
+            using (var options = new ToolsOptions.OptionsForm(ParentHierarchy,TFS))
             {
                 options.ShowDialog();
             }
@@ -92,13 +96,22 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         public void ViewAllBuilds()
         {
-            var node = FindAssociated.AssociatedNode("All Build Definitions", this);
+            var node = FindAssociated.AssociatedNode("All Build Definitions", this, defaultSep);
             node.ParentHierarchy.CallMethod("ViewBuilds", node);
         }
 
         public void QueueDefaultSubFolderBuilds()
         {
             // ignore here, should never be called
+        }
+
+
+        /// <summary>
+        /// Not used
+        /// </summary>
+        public bool IsFolderNode
+        {
+            get { return false; }
         }
     }
 

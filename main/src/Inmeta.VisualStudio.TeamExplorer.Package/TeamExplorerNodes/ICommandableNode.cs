@@ -15,5 +15,6 @@
 
         void Options();
         bool IsDisabled { get; }
+        bool IsFolderNode { get; }  // Is a build maskerading as a folder, thus will have a name like 
     }
 }

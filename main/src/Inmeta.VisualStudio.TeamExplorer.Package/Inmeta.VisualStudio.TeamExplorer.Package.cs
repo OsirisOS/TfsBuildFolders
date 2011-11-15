@@ -108,5 +108,10 @@ namespace Inmeta.VisualStudio.TeamExplorer
             throw new ArgumentException(serviceType.ToString());
               
         }
+
+        
+
+
+
     }
 }

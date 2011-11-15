@@ -20,6 +20,12 @@ namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
             return CreateOrMergeIntoTree(path, sep, root, false);
         }
 
+        private static bool Compare(string a, string b)
+        {
+            var result = string.Compare(a, b, true);
+            return result == 0;
+        }
+
         /// <summary>
         /// Populate a IBuildDefinitionTreeNode with a new path.
         /// </summary>
@@ -67,7 +73,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
                     //Builds:
                     //    test.min
                     //    test
-                    var folder = parent.Children.Where(c => part1 == c.Name && !c.IsLeafNode).FirstOrDefault();
+                    var folder = parent.Children.Where(c => Compare(part1,c.Name) && !c.IsLeafNode).FirstOrDefault();
                     if (folder == null)
                     {
                         folder = new BuildDefinitionFolderNode(part, sep);
@@ -82,12 +88,14 @@ namespace Inmeta.VisualStudio.TeamExplorer.HierarchyFactory
             {
                 // Check to see if the last part is an existing  folder 
                 var part1 = parts.Last();
-                var folder = parent.Children.Where(c => part1 == c.Name).FirstOrDefault();
-                var leaf = new BuildDefinitionLeafNode(part1, sep, disabled);
+                var folder = parent.Children.Where(c => Compare(part1, c.Name)).FirstOrDefault();
+                
                 if (folder != null)  // // Check to see if the last part is an existing  folder
                 {
-                    parent = folder;    
+                    parent = folder;
+                    part1 = "$";
                 }
+                var leaf = new BuildDefinitionLeafNode(part1, sep, disabled);
                 ((BuildDefinitionTreeNode)parent).AddChild(leaf);
                 
             }
