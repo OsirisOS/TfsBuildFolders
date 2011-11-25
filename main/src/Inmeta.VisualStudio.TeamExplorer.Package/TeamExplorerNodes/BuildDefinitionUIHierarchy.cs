@@ -43,38 +43,36 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
             _instance = this;
             IVsMonitorSelection monitorSelectionService = (IVsMonitorSelection)BasicHelper.GetService<SVsShellMonitorSelection>();
             monitorSelectionService.AdviseSelectionEvents(this, out _monitorSelectionCockie);
-            var options = new Options(this,TFS);
+            var options = new Options(this, TFS);
             timer = new Timer(options.TimerDelayBeforeRefresh);
             timer.Elapsed += OnTimer;
             timer.Enabled = options.UseTimedRefreshAtStartup;
             string name;
             parentHierarchy.GetCanonicalName(itemId, out name);
-            
-            
-           
-            
+
+
+
+
         }
 
-       
 
-        private void OnTimer(object source,ElapsedEventArgs e)
+
+        private void OnTimer(object source, ElapsedEventArgs e)
         {
             timer.Enabled = false;
-            //var clk = new Stopwatch();   // Use the clock information in Tracepoints
+            //var clk = new Stopwatch();   // Use the clock information in Tracepoints, commented out for production code
             //clk.Start();
             int no = RefreshTree();
             //clk.Stop();
-            if (no == 0)
+            if (no == 0)  // If we didnt find anyone, the build tree has not finished at all. It will always return at least one, the All build definitions node
                 timer.Enabled = true;
-
-
         }
 
         public override int ExecCommand(uint itemId, ref Guid guidCmdGroup, uint nCmdId, uint nCmdExecOpt, IntPtr pvain, IntPtr p)
         {
             if (guidCmdGroup == GuidList.guidInmeta_VisualStudio_TeamExplorer_PackageCmdSet)
             {
-                var node = this.NodeFromItemId(itemId) as ICommandableNode;
+                var node = NodeFromItemId(itemId) as ICommandableNode;
                 switch (nCmdId)
                 {
                     case GuidList.BtnRefresh:
@@ -133,7 +131,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         public void Options()
         {
-            using (var options = new OptionsForm(Hierarchy,TFS))
+            using (var options = new OptionsForm(Hierarchy, TFS))
             {
                 options.ShowDialog();
             }
@@ -141,7 +139,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         public override int QueryStatusCommand(uint itemId, ref Guid guidCmdGroup, uint cCmds, OLECMD[] cmds, IntPtr pCmdText)
         {
-            var options = new Options(this,TFS);
+            var options = new Options(this, TFS);
             if (guidCmdGroup == GuidList.guidInmeta_VisualStudio_TeamExplorer_PackageCmdSet)
             {
                 //this gory code makes the correct context commands visible depending on its position in the hierarchy (root, branch or leaf). 
@@ -163,14 +161,14 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
                         if (node is BuildDefinitionExplorerNode)
                         {
                             //if not children invisible = true
-                            if (node.FirstChild == null)  // leaf nodes || cmds[0].cmdID == GuidList.BtnQueueDefaultSubBuilds)
+                            if (node.FirstChild == null)
                             {
-                                if ((cmds[0].cmdID != GuidList.BtnQueueDefaultSubBuilds && cmds[0].cmdID != GuidList.BtnEditDefinition)  // Always stay off for leaf nodes, except for the case in the next two line
+                                if ((cmds[0].cmdID != GuidList.BtnQueueDefaultSubBuilds && cmds[0].cmdID != GuidList.BtnEditDefinition)  // Always stay off for leaf nodes, except for the case in the next two lines
                                     || (cmds[0].cmdID == GuidList.BtnQueueDefaultSubBuilds && (options.QueueDefaultBuild == BuildExplorerSettings.QueueDefaultBuildControlValues.Allow))
-                                    || (cmds[0].cmdID == GuidList.BtnEditDefinition && !(node as BuildDefinitionExplorerNode).IsAllBuildDefinitionsNode)                                        
+                                    || (cmds[0].cmdID == GuidList.BtnEditDefinition && !(node as BuildDefinitionExplorerNode).IsAllBuildDefinitionsNode)
                                     )
                                     result &= ~(int)OLECMDF.OLECMDF_INVISIBLE;
-                             }
+                            }
                             else // folder nodes
                                 if ((cmds[0].cmdID == GuidList.BtnQueueDefaultSubBuilds && options.QueueDefaultBuild != BuildExplorerSettings.QueueDefaultBuildControlValues.DontAllow) ||
                                     cmds[0].cmdID == GuidList.BtnViewAllBuilds)
@@ -234,10 +232,10 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         public int PopulateTree(BaseHierarchyNode teNode)
         {
-            var options = new Options(this,TFS);
+            var options = new Options(this, TFS);
             var sep = options.SeparatorToken;
             var root = BuildDefinitionTreeNodeFactory.CreateOrMergeIntoTree("root", sep, null, false);
-            int NoOfBuilds=0;
+            int noOfBuilds = 0;
             try
             {
                 //This code uses reflection since this is the only way to get hold of the associated build nodes.
@@ -262,14 +260,14 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
                         bool disabled = buildNodeKV.Value.OverlayIconIndex == 6;   // Number found through investigation, we only look in the Build folder, we dont access the Build definitions, in order to keep performance up
                         BuildDefinitionTreeNodeFactory.CreateOrMergeIntoTree("root" + sep + buildNodeKV.Value.Name,
                                                                                  sep, root, disabled);
-                        NoOfBuilds++;
+                        noOfBuilds++;
 
                     }
                     break;
                 }
 
                 //merge tree with UI nodes.
-                if (NoOfBuilds>0)
+                if (noOfBuilds > 0)
                     RecursiveBuildNodes(root, teNode, sep);
             }
             catch (Exception ex)
@@ -290,13 +288,13 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
                 throw;
             }
-            return NoOfBuilds;
+            return noOfBuilds;
         }
 
         private void RecursiveBuildNodes(IBuildDefinitionTreeNode root, BaseHierarchyNode teNode, char sep)
         {
             //create nodes on this level and call recursive on children.
-            foreach (var buildNode in root.Children.Select(node => new BuildDefinitionExplorerNode(node, sep,TFS)))
+            foreach (var buildNode in root.Children.Select(node => new BuildDefinitionExplorerNode(node, sep, TFS)))
             {
                 buildNode.AddChildren();
                 teNode.AddChild(buildNode);

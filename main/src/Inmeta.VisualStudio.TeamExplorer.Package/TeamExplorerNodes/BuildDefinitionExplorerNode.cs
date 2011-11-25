@@ -203,7 +203,7 @@ namespace Inmeta.VisualStudio.TeamExplorer.ExplorerNodes
 
         private IBuildServer GetBuildServer()
         {
-            var authenticatedTFS = new AuthTfsTeamProjectCollection(TFS);                   // (ParentHierarchy.ServerUrl);
+            var authenticatedTFS = new AuthTfsTeamProjectCollection(TFS);                   // was formerly (ParentHierarchy.ServerUrl);
             return authenticatedTFS.TfsBuildServer;
         }
     }
